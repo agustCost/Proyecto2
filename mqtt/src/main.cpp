@@ -7,7 +7,7 @@ const char* ssid = "HUAWEI-IoT";
 const char* password = "ORTWiFiIoT";
 const char* mqtt_server = "demo.thingsboard.io";
 const char* token = "qvZ204btlqydKSwKs2kd";
-//canario tonto
+
 // Objetos de conexión
 WiFiClient espClient;
 PubSubClient client(espClient);
