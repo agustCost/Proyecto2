@@ -27,6 +27,7 @@ int value = 0;
 
 // Estado del LED
 boolean estado = false;
+boolean status = false;
 
 // Función para iniciar la conexión WiFi
 void setup_wifi() {
@@ -68,21 +69,25 @@ void callback(char* topic, byte* payload, unsigned int length) {
     deserializeJson(incoming_message, payload);
     String metodo = incoming_message["method"];
 
-    if (metodo == "checkStatus") {  // Verificar estado del dispositivo
+    if (metodo == "getState") {  // Verificar estado del dispositivo
       char outTopic[128];
       ("v1/devices/me/rpc/response/" + _number).toCharArray(outTopic, 128);
 
       DynamicJsonDocument resp(256);
-      resp["status"] = true;
+      resp["status"] = status;
       char buffer[256];
       serializeJson(resp, buffer);
       client.publish(outTopic, buffer);
-    } else if (metodo == "setLedStatus") {  // Encender/apagar LED
+
+    } else if (metodo == "setState") {  // Encender/apagar LED
       boolean estado = incoming_message["params"];
       if (estado) {
-        digitalWrite(LED_BUILTIN, LOW);  // Encender LED
+        digitalWrite(LED_BUILTIN, HIGH);  // Encender LED
+        status = true;
+
       } else {
-        digitalWrite(LED_BUILTIN, HIGH);  // Apagar LED
+        digitalWrite(LED_BUILTIN, LOW);  // Apagar LED
+        status = !status;
       }
       // Actualización de atributos
       DynamicJsonDocument resp(256);
@@ -90,6 +95,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
       char buffer[256];
       serializeJson(resp, buffer);
       client.publish("v1/devices/me/attributes", buffer);
+      Serial.print("Publicar mensaje [atributo]: ");
+      Serial.println(buffer);
+
+    } else if(metodo == "getState"){
+      DynamicJsonDocument stateBuffer(256);
+      stateBuffer["estado"] = status;
+      char buffer[256];
+      serializeJson(stateBuffer, buffer);
+      client.publish("v1/devices/me/rpc/response/...", buffer);
       Serial.print("Publicar mensaje [atributo]: ");
       Serial.println(buffer);
     }
@@ -114,7 +128,7 @@ void reconnect() {
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);  // Inicializar el pin LED_BUILTIN como salida
-  Serial.begin(115200);
+  Serial.begin(921600);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
