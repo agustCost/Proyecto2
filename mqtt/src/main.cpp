@@ -1,16 +1,24 @@
 #include <WiFi.h>  // Librería para ESP32 WiFi
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include <ThingsBoard.h>
 
 // Configuraciones para la red WiFi y el servidor MQTT
-const char* ssid = "HUAWEI-IoT";
-const char* password = "ORTWiFiIoT";
+
+//const char* ssid = "HUAWEI-IoT";
+//const char* password = "ORTWiFiIoT";
+
+const char* ssid = "ACERNITRO5";
+const char* password = "12345678";
+
 const char* mqtt_server = "demo.thingsboard.io";
-const char* token = "qvZ204btlqydKSwKs2kd";
+const char* token = "xCaNJdyujXONWJSItHZw";
 
 // Objetos de conexión
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+const int input = 19;
 
 // Timestamp de la última actualización de telemetría
 unsigned long lastMsg = 0;
@@ -126,12 +134,52 @@ void reconnect() {
   }
 }
 
+
+
+// ======= START FUNC =======
+
+void publish_telemetry(int value){
+  // Enviar valor como telemetría
+    DynamicJsonDocument resp(256);
+    resp["value"] = value;
+    char buffer[256];
+    serializeJson(resp, buffer);
+
+    client.publish("v1/devices/me/telemetry", buffer);
+
+    Serial.print("Publicar mensaje [telemetría]: ");
+    Serial.println(buffer);
+}
+
+void publish_attributes(int value){
+  // Enviar valor como telemetría
+    DynamicJsonDocument resp(256);
+    resp["estado"] = value;
+    char buffer[256];
+    serializeJson(resp, buffer);
+
+    client.publish("v1/devices/me/attributes", buffer);
+
+    Serial.print("Publicar mensaje [atributo]: ");
+    Serial.println(buffer);
+}
+
+void request_attribues(){
+
+}
+
+// ======= END FUNC =======
+
+
+
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);  // Inicializar el pin LED_BUILTIN como salida
   Serial.begin(921600);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+
+  pinMode(input, INPUT);
 }
 
 void loop() {
@@ -143,17 +191,15 @@ void loop() {
   unsigned long now = millis();
   if (now - lastMsg > 2000) {
     lastMsg = now;
-    value = random(100);
+    // value = random(100);
+    bool check = digitalRead(input);
 
-    // Enviar valor como telemetría
-    DynamicJsonDocument resp(256);
-    resp["value"] = value;
-    char buffer[256];
-    serializeJson(resp, buffer);
-
-    client.publish("v1/devices/me/telemetry", buffer);
-
-    Serial.print("Publicar mensaje [telemetría]: ");
-    Serial.println(buffer);
+    if(check){
+      value = 1;
+    }else{
+      value = 0;
+    }
+    publish_attributes(value);
   }
 }
+
