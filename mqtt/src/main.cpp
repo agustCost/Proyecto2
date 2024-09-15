@@ -1,15 +1,17 @@
 #include <WiFi.h>  // Librería para ESP32 WiFi
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
-#include <ThingsBoard.h>
+// #include <ThingsBoard.h>
 
 // Configuraciones para la red WiFi y el servidor MQTT
 
 //const char* ssid = "HUAWEI-IoT";
 //const char* password = "ORTWiFiIoT";
 
-const char* ssid = "ACERNITRO5";
-const char* password = "12345678";
+//const char* ssid = "ACERNITRO5";
+//const char* password = "12345678";
+const char* ssid = "TP-Link_719F";
+const char* password = "03559376";
 
 const char* mqtt_server = "demo.thingsboard.io";
 const char* token = "xCaNJdyujXONWJSItHZw";
